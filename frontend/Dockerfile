@@ -1,0 +1,21 @@
+FROM node:20-bookworm
+
+WORKDIR /app
+
+# Install cert tools
+RUN apt-get update && apt-get install -y ca-certificates
+
+# Add corporate cert
+COPY zscaler.crt /usr/local/share/ca-certificates/zscaler.crt
+RUN update-ca-certificates
+
+# Tell Node to use system certs
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

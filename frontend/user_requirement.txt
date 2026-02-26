@@ -1,0 +1,7 @@
+1. I want the system can show lineage from different etl framwork config database, since there are many etl framework config datbase such as dbetl_t2_t3, dbetl_dev, etc.
+2. I want the system, can show:
+  a. immediate upstream
+  b. full tree upstream
+  c. impact analysis
+  d. run order
+

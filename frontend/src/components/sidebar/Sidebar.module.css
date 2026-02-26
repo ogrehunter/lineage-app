@@ -1,0 +1,131 @@
+/* =========================
+   Sidebar Container
+========================= */
+
+.sidebar {
+  width: 240px;
+  height: 100%;
+
+  background: #0f172a;
+  color: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+
+  transition: width 0.25s ease;
+  overflow-y: auto;
+}
+
+.collapsed {
+  width: 56px;
+}
+
+
+/* =========================
+   Header
+========================= */
+
+.header {
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  overflow: hidden;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  color: #cbd5f5;
+
+  cursor: pointer;
+  font-size: 16px;
+
+  display: flex;
+  align-items: center;
+}
+
+
+/* =========================
+   Navigation
+========================= */
+
+.nav {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Link Base */
+
+.link,
+.activeLink {
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px;
+
+  text-decoration: none;
+  font-size: 14px;
+  color: #cbd5f5;
+
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+
+/* Hover State */
+
+.link:hover {
+  background: #334155;
+}
+
+
+/* Active State */
+
+.activeLink {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+
+/* Icon + Label Layout */
+
+.navContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+
+/* Center icons when collapsed */
+
+.collapsed .navContent {
+  justify-content: center;
+}
+
+
+/* Label */
+
+.label {
+  white-space: nowrap;
+}
+

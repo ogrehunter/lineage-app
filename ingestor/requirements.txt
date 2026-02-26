@@ -1,0 +1,5 @@
+sqlglot
+python-dotenv
+mssql-python
+psycopg2-binary
+

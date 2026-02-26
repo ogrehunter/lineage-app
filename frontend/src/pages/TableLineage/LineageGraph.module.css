@@ -1,0 +1,10 @@
+.main {
+  height: 100%;
+}
+
+.rootNode {
+  border: 2px solid #2563eb;
+  font-weight: bold;
+  background: #eff6ff;
+}
+

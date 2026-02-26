@@ -1,0 +1,47 @@
+.form {
+  margin-obttom: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+
+.input {
+  padding: 0.5rem;
+  flex: 1;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.filterSelect,
+.filterInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+
+  font-size: 1px solid #cbd5e1;
+  border-radius: 4px;
+
+  background: white;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}

@@ -1,0 +1,17 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  marginTop: 0.5rem;
+}
+
+.title {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  margin: 0;
+  padding: 10px;
+  zIndex: 20;
+  borderBottom: 1px solid #ddd;
+}
+
+
