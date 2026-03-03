@@ -45,7 +45,7 @@ export async function fetchLineage(
 ): Promise<LineageResponse> {
 
   const res = await fetch(
-    `http://172.24.97.125:3000/api/lineage/table?etl=${etl}&schema=${schema}&table=${table}&level=${level}`
+    `/api/lineage/table?etl=${etl}&schema=${schema}&table=${table}&level=${level}`
   )
   if (!res.ok) {
     throw new Error("Failed to fetch lineage")

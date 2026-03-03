@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const GRAPH_URL = process.env.GRAPH_URL;
+
 const fastify = Fastify({
   logger: true,
 });
@@ -27,7 +29,7 @@ fastify.get("/api/lineage/table", async (request, reply) => {
 
   try {
     const response = await fetch(
-      `http://172.24.97.125:7373/graph/lineage?etl=${etl}&schema=${schema}&table=${table}&level=${maxLevel}`,
+      `${GRAPH_URL}/graph/lineage?etl=${etl}&schema=${schema}&table=${table}&level=${maxLevel}`,
     );
 
     if (!response.ok) {

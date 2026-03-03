@@ -29,7 +29,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 
-COPY ./ingestor/requirements.txt ./requirements.txt
+COPY ./parser/requirements.txt ./requirements.txt
 
 ENV PIP_CERT=/etc/ssl/certs/ca-certificates.crt
 
@@ -37,7 +37,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-COPY ./ingestor/entrypoint.sh /
+COPY ./parser/entrypoint.sh /
 
 RUN chmod +x /entrypoint.sh
 

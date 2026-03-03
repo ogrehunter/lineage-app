@@ -36,10 +36,10 @@ services:
       timeout: 5s
       retries: 5
 
-  parser-ingestor:
+  parser:
     build:
       context: .
-      dockerfile: ./ingestor/Dockerfile
+      dockerfile: ./parser/Dockerfile
     container_name: lineage-parser
     env_file:
       - .env
@@ -53,11 +53,13 @@ services:
     container_name: lineage-api
     ports:
       - "3000:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      graph:
-        condition: service_started
+    environment:
+      - GRAPH_URL=http://graph:7373
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      graph:
+#        condition: service_started
 
   graph:
     build:
@@ -66,9 +68,9 @@ services:
     container_name: graph-worker
     env_file:
       - .env
-    depends_on:
-      parser-ingestor:
-        condition: service_completed_successfully
+#    depends_on:
+#      parser:
+#        condition: service_completed_successfully
     ports:
       - "7373:7373"
   

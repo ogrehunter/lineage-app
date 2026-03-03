@@ -3,7 +3,7 @@ set -e
 
 echo "Starting ingestion..."
 
-python ./ingestor/main.py
+python ./parser/main.py
 
 echo "Finished."
 
