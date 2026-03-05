@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import LineageGraph from "./LineageGraph"
 import UpstreamList from "./UpstreamTable"
 import DownstreamList from "./DownstreamTable"
-import SearchBox from "./SearchBox"
 import styles from "./TableLineagePage.module.css"
 import { fetchLineage } from "../../api/lineage"
 
@@ -11,9 +10,10 @@ import { useSearchParams } from "react-router-dom"
 import type { LineageResponse } from "../../api/lineage"
 
 
+
 export default function TableLineagePage() {
 
-  const [params, setParams] = useSearchParams()
+  const [params] = useSearchParams()
 
   const etl = params.get("etl") || "dbetl_t2_t3"
   const schema = params.get("schema") || "dbigz_prod"
@@ -52,22 +52,6 @@ export default function TableLineagePage() {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.searchContainer}>
-        <SearchBox
-          defaultEtl={etl}
-          defaultSchema={schema}
-          defaultTable={table}
-          defaultLevel={level}
-          onSearch={({ etl, table, schema, level }) => {
-            setParams({
-              etl,
-              table,
-              schema,
-              level: String(level),
-            });
-          }}
-        />
-      </div>
 
       {loading && <p>Loading...</p>}
 

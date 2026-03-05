@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
-import type { CSSProperties } from "react"
-import { Routes, Route } from "react-router-dom"
+import { NavLink, Navigate, Routes, Route } from "react-router-dom"
 import Header from "./components/header/Header"
 import Sidebar from "./components/sidebar/Sidebar"
 import Footer from "./components/footer/Footer"
@@ -8,6 +7,7 @@ import TableLineagePage from "./pages/TableLineage/TableLineagePage"
 import ColumnLineagePage from "./pages/ColumnLineage/ColumnLineagePage"
 import ExecDepPage from "./pages/ExecutionDependency/ExecDepPage"
 import styles from "./App.module.css"
+import { SIDEBAR_MENU } from "./menu/sidebarMenu"
 
 
 
@@ -15,6 +15,7 @@ import styles from "./App.module.css"
    Main App Layout
 ------------------------------ */
 export default function App() {
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem("sidebar") === "collapsed"
   })
@@ -29,8 +30,7 @@ export default function App() {
   }, [sidebarCollapsed])
 
   return (
-    <div className={styles.appLayout}
-    >
+    <div className={styles.appLayout}>
       <div className={styles.bodyLayout}>
         <Sidebar
           width={sidebarWidth}
@@ -42,11 +42,30 @@ export default function App() {
           <Header />
 
           <main className={styles.main}>
-            <Routes>
-              <Route path="/table" element={<TableLineagePage />} />
-              <Route path="/column" element={<ColumnLineagePage />} />
-              <Route path="/execution_dependency" element={<ExecDepPage />} />
-            </Routes>
+            <nav className={styles.tabs} aria-label="Main navigation tabs">
+              {SIDEBAR_MENU.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    isActive ? styles.activeTab : styles.tab
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+
+            <div className={styles.mainContent}>
+              <Routes>
+                <Route path="/" element={<Navigate to="/table" replace />} />
+                <Route path="/table" element={<TableLineagePage />} />
+                <Route path="/column" element={<ColumnLineagePage />} />
+                <Route path="/execution_dependency" element={<ExecDepPage />} />
+                <Route path="*" element={<Navigate to="/table" replace />} />
+              </Routes>
+            </div>
           </main>
           <Footer />
         </section>
@@ -54,4 +73,3 @@ export default function App() {
     </div>
   )
 }
-

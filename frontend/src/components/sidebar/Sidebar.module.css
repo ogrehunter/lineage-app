@@ -45,7 +45,7 @@
   letter-spacing: 0.3px;
 
   max-width: 120px;
-  white-space: nowarp;
+  white-space: nowrap;
   overflow: hidden;
   transition: opacity 0.2s ease, max-width 0.25s ease;
 }
@@ -139,3 +139,47 @@
   transition: opacity 0.2s ease, max-width 0.25s ease;
 }
 
+.searchForm {
+  margin: 1rem 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #111c34;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.searchTitle {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.searchLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #cbd5f5;
+  font-size: 12px;
+}
+
+.searchInput {
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 0.4rem 0.5rem;
+}
+
+.searchButton {
+  margin-top: 0.25rem;
+  border: none;
+  border-radius: 6px;
+  background: #38bdf8;
+  color: #0f172a;
+  padding: 0.45rem 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}

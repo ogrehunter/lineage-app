@@ -7,8 +7,6 @@ import {
   Controls,
   type Node,
   type Edge,
-  useNodesState,
-  useEdgesState
 } from "@xyflow/react"
 
 import "@xyflow/react/dist/style.css"
@@ -35,7 +33,7 @@ interface LineageNode {
 interface LineageEdge {
   from: string
   to: string
-  type: string
+  type?: string
 }
 
 interface Props {
@@ -59,7 +57,7 @@ export default function LineageGraph({
   root,
   nodes,
   edges,
-  direction = "TB",
+  direction = "LR",
 }: Props) {
 
 
@@ -122,14 +120,19 @@ export default function LineageGraph({
       )
 
       // Build edges
-      .map((e) => ({
-        id: `${e.from}-${e.to}-${e.type}`,
+      .map((e, index) => {
+        const edgeType = e.type ?? "unknown"
 
-        source: e.from,
-        target: e.to,
+        return {
 
-        label: e.type,
-      }))
+          id: `${e.from}-${e.to}-${e.type}-${index}`,
+
+          source: e.from,
+          target: e.to,
+
+          //label: edgeType,
+        }
+      })
 
 
     /* -----------------------------
