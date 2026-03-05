@@ -3,21 +3,24 @@
 ========================= */
 
 .sidebar {
-  width: 240px;
+  --sidebar-width: 240px;
+  
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  flex: 0 0 var(--sidebar-width);
   height: 100%;
-
+  
   background: #0f172a;
   color: #ffffff;
 
   display: flex;
   flex-direction: column;
 
-  transition: width 0.25s ease;
+  transition: width 0.25s ease, min-width 0.25s, flex-basis 0.25s ease;
   overflow-y: auto;
 }
 
 .collapsed {
-  width: 56px;
 }
 
 
@@ -40,13 +43,17 @@
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.3px;
+
+  max-width: 120px;
+  white-space: nowarp;
+  overflow: hidden;
+  transition: opacity 0.2s ease, max-width 0.25s ease;
 }
 
 .hidden {
   opacity: 0;
   pointer-events: none;
-  width: 0;
-  overflow: hidden;
+  max-width: 0;
 }
 
 .toggleBtn {
@@ -127,5 +134,8 @@
 
 .label {
   white-space: nowrap;
+  overflow: hidden;
+  max-width: 160px;
+  transition: opacity 0.2s ease, max-width 0.25s ease;
 }
 

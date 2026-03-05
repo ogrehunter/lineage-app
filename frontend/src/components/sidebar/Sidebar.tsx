@@ -1,30 +1,34 @@
-import { useState } from "react"
 import { NavLink } from "react-router-dom"
+
+import type { CSSProperties } from "react"
 
 import styles from "./Sidebar.module.css"
 
 import { Icons } from "../../icons"
 import { SIDEBAR_MENU } from "../../menu/sidebarMenu"
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(() => {
-    return localStorage.getItem("sidebar") === "collapsed"
-  })
 
-  const toggle = () => {
-    const next = !collapsed
-    setCollapsed(next)
+type SidebarProps = {
+  width: number
+  collapsed: boolean
+  onToggle: () => void
+}
 
-    localStorage.setItem(
-      "sidebar",
-      next ? "collapsed" : "open"
-    )
-  }
+export default function Sidebar({
+  width,
+  collapsed,
+  onToggle
+}: SidebarProps) {
+  const sidebarStyle = {
+    "--sidebar-width": `${width}px`
+  } as CSSProperties;
+
+  const ToggleIcon = collapsed ? Icons.panelOpen : Icons.panelClose;
 
   return (
     <aside
-      className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""
-        }`}
+      className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
+      style={sidebarStyle}
     >
       {/* Header */}
       <div className={styles.header}>
@@ -38,14 +42,13 @@ export default function Sidebar() {
 
         <button
           className={styles.toggleBtn}
-          onClick={toggle}
+          onClick={onToggle}
           aria-label="Toggle sidebar"
         >
-          {collapsed ? "»" : "«"}
+          <ToggleIcon size={18} />
         </button>
       </div>
 
-      {/* Menu */}
       <nav className={styles.nav}>
         {SIDEBAR_MENU.map((item) => {
           const Icon = Icons[item.icon]
@@ -77,7 +80,7 @@ export default function Sidebar() {
           )
         })}
       </nav>
-    </aside >
+    </aside>
   )
 }
 

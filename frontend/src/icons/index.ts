@@ -6,6 +6,8 @@ import {
   Clock,
   BarChart3,
   Filter,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 export const Icons = {
@@ -16,6 +18,8 @@ export const Icons = {
   recent: Clock,
   metrics: BarChart3,
   filter: Filter,
+  panelClose: PanelLeftClose,
+  panelOpen: PanelLeftOpen,
 };
 
 export type IconName = keyof typeof Icons;
