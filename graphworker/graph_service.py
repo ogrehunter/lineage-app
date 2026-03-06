@@ -70,6 +70,10 @@ class LineageGraphService:
         # Collapse TempView nodes
         G = self._collapse_tempview_nodes(G)
 
+        # Self-joins used for incremental loads can generate self-relationships.
+        # Those edges are not useful for lineage traversal and create 1-node cycles.
+        G = self._remove_self_relationships(G)
+
         self.graphs[etl_schema] = G
         return G
 
@@ -105,6 +109,18 @@ class LineageGraphService:
                         G.add_edge(p, s, job=job)
 
             G.remove_node(temp_node)
+
+        return G
+
+    # ---------------------------------------------------
+    # REMOVE SELF RELATIONSHIP
+    # ---------------------------------------------------
+    def _remove_self_relationships(self, G: nx.DiGraph):
+
+        self_edges = list(nx.selfloop_edges(G))
+
+        if self_edges:
+            G.remove_edges_from(self_edges)
 
         return G
 
