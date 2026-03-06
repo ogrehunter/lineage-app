@@ -1,4 +1,9 @@
 import styles from "./DownstreamTable.module.css"
+import type { UpstreamDownstreamItem } from "../../api/lineage"
+
+interface Props {
+  data: UpstreamDownstreamItem[]
+}
 
 export default function DownstreamList({ data }: Props) {
   return (
