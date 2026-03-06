@@ -21,16 +21,16 @@ export const SIDEBAR_MENU: MenuItem[] = [
     icon: "topology",
   },
   {
+    label: "Impacted Tables",
+    path: "/impacted_table",
+    icon: "history",
+  },
+  {
     label: "Column Lineage",
     path: "/column",
     icon: "column",
   },
   /*
-  {
-    label: "Search History",
-    path: "/search_history",
-    icon: "history",
-  },
   {
     label: "Recently Analyzed Tables",
     path: "/recently_analyzed_tables",

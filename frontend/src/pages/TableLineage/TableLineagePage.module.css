@@ -1,40 +1,32 @@
+.pageContainer {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  gap: 1rem;
+  min-height: 0;
+}
 
-  .pageContainer {
-    height: 100%;
-    display: grid;
-    grid-template-columns: 4fr 1fr;
-    gap: 1rem;
-    min-height: 0;
-  }
+.graphContainer {
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
 
-  .graphContainer {
-    min-height: 0;
-    min-widht: 0;
-    
-    overflow: auto;
-   
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-  }
+.tablesContainer {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr;
+  min-height: 0;
+  min-width: 0;
+  gap: 1rem;
+}
 
-  .tablesContainer {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    grid-tempalte-columns: 1fr 1fr;
-    
-    min-height: 0;
-    min-widht: 0;
-
-    gap: 1rem;
-  }
-
-  .tableBox {
-    min-height: 0;
-    overflow: auto;
-
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 0.5rem;
-  }
-
-
+.tableBox {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.5rem;
+}

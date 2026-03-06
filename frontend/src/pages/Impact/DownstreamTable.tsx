@@ -1,18 +1,19 @@
-import styles from "./UpstreamTable.module.css"
+import styles from "./DownstreamTable.module.css"
 
-export default function UpstreamList({ data }: Props) {
+export default function DownstreamList({ data }: Props) {
   return (
     <div
       className={styles.container}>
       {/* Sticky Title */}
-      <h3 className={styles.title}>Upstream</h3>
+      <h3 className={styles.title}>
+        Downstream
+      </h3>
 
       {!data || data.length === 0 ? (
-        <div className={styles.emptyState}>No upstream dependencies</div>
+        <div className={styles.emptyState}>No downstream child</div>
       ) : (
         <div className={styles.tableWrapper}>
-          <table
-            className={styles.table}>
+          <table className={styles.table}>
             <thead>
               <tr>
                 {["#", "Schema", "Table", "Level", "Via Job"].map((col) => (

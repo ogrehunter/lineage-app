@@ -50,7 +50,10 @@ export default function Sidebar({
   const location = useLocation()
   const [params, setParams] = useSearchParams()
 
-  const isSearchPage = location.pathname === "/table" || location.pathname === "/execution_dependency" || location.pathname === "/column"
+  const isSearchPage = location.pathname === "/table"
+    || location.pathname === "/execution_dependency"
+    || location.pathname === "/impacted_table"
+    || location.pathname === "/column"
 
   const defaults = DEFAULT_SEARCH_VALUES[location.pathname] ?? DEFAULT_SEARCH_VALUES["/table"]
 

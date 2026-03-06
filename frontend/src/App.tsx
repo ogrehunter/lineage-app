@@ -6,6 +6,7 @@ import Footer from "./components/footer/Footer"
 import TableLineagePage from "./pages/TableLineage/TableLineagePage"
 import ColumnLineagePage from "./pages/ColumnLineage/ColumnLineagePage"
 import ExecDepPage from "./pages/ExecutionDependency/ExecDepPage"
+import ImpactDepPage from "./pages/Impact/ImpactDepPage"
 import styles from "./App.module.css"
 import { SIDEBAR_MENU } from "./menu/sidebarMenu"
 
@@ -68,6 +69,7 @@ export default function App() {
                 <Route path="/table" element={<TableLineagePage />} />
                 <Route path="/column" element={<ColumnLineagePage />} />
                 <Route path="/execution_dependency" element={<ExecDepPage />} />
+                <Route path="/impacted_table" element={<ImpactDepPage />} />
                 <Route path="*" element={<Navigate to="/table" replace />} />
               </Routes>
             </div>

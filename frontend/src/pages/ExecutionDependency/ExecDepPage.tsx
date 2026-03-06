@@ -54,7 +54,7 @@ export default function ExecDepPage() {
       {lineage && !loading && (
 
 
-        <div className={styles.tableContainer}>
+        <div className={styles.tablesContainer}>
           <div className={styles.tableBox}>
             <UpstreamList
               data={lineage.upstream} />

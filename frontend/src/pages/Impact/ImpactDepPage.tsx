@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react"
-import LineageGraph from "./LineageGraph"
-//import DownstreamList from "./DownstreamTable"
-import styles from "./TableLineagePage.module.css"
+import styles from "./ImpactDepPage.module.css"
+
+import DownstreamList from "./DownstreamTable"
+
 import { fetchLineage } from "../../api/lineage"
 
 import { useSearchParams } from "react-router-dom"
 
 import type { LineageResponse } from "../../api/lineage"
 
-
-
-export default function TableLineagePage() {
+export default function ImpactDepPage() {
 
   const [params] = useSearchParams()
 
@@ -34,23 +33,19 @@ export default function TableLineagePage() {
         const data = await fetchLineage(etl, schema, table, level)
 
         setLineage(data)
-
       } catch (err) {
         console.error(err)
         setError("Failed to load lineage")
-
       } finally {
         setLoading(false)
       }
     }
-
-
     loadData()
-    console.log("URL params: ", { etl, schema, table, level });
-  }, [etl, schema, table, level]);
+  }, [etl, schema, table, level])
 
   return (
     <div className={styles.pageContainer}>
+      {!loading && !error && lineage && <p>Execution dependency data loaded for {schema}.{table}.</p>}
 
       {loading && <p>Loading...</p>}
 
@@ -58,32 +53,14 @@ export default function TableLineagePage() {
 
       {lineage && !loading && (
 
-        <>
-          {/* Graph */}
 
-          <div className={styles.graphContainer}>
-            <LineageGraph
-              root={lineage.root}
-              nodes={lineage.nodes}
-              edges={lineage.edges}
-            />
+        <div className={styles.tablesContainer}>
+          <div className={styles.tableBox}>
+            <DownstreamList
+              data={lineage.downstream} />
           </div>
-
-          {/* Tables */}
-
-          <div className={styles.tablesContainer}>
-
-            {/*            <div className={styles.tableBox}>
-              <DownstreamList
-                data={lineage.downstream}
-              />
-            </div>
-*/}
-          </div>
-        </>
-      )
-      }
-
-    </div >
+        </div>
+      )}
+    </div>
   )
 }
