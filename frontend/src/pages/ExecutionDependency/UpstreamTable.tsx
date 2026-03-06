@@ -20,7 +20,7 @@ export default function UpstreamList({ data }: Props) {
       {!data || data.length === 0 ? (
         <div style={{ padding: "10px" }}>No upstream dependencies</div>
       ) : (
-        <div style={{ overflowY: "auto", flex: 1 }}>
+        <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
           <table
             style={{
               width: "100%",

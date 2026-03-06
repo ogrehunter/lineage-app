@@ -8,6 +8,7 @@ import {
   Filter,
   PanelLeftClose,
   PanelLeftOpen,
+  Search,
 } from "lucide-react";
 
 export const Icons = {
@@ -20,6 +21,7 @@ export const Icons = {
   filter: Filter,
   panelClose: PanelLeftClose,
   panelOpen: PanelLeftOpen,
+  search: Search,
 };
 
 export type IconName = keyof typeof Icons;

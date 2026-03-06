@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { NavLink, Navigate, Routes, Route } from "react-router-dom"
+import { NavLink, Navigate, Routes, Route, useLocation } from "react-router-dom"
 import Header from "./components/header/Header"
 import Sidebar from "./components/sidebar/Sidebar"
 import Footer from "./components/footer/Footer"
@@ -15,6 +15,8 @@ import { SIDEBAR_MENU } from "./menu/sidebarMenu"
    Main App Layout
 ------------------------------ */
 export default function App() {
+
+  const location = useLocation()
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem("sidebar") === "collapsed"
@@ -46,7 +48,10 @@ export default function App() {
               {SIDEBAR_MENU.map((item) => (
                 <NavLink
                   key={item.path}
-                  to={item.path}
+                  to={{
+                    pathname: item.path,
+                    search: location.search,
+                  }}
                   end={item.end}
                   className={({ isActive }) =>
                     isActive ? styles.activeTab : styles.tab

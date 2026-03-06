@@ -2,7 +2,7 @@
   .pageContainer {
     height: 100%;
     display: grid;
-    grid-template-columns: 4fr 3fr;
+    grid-template-columns: 4fr 1fr;
     gap: 1rem;
     min-height: 0;
   }
@@ -20,6 +20,7 @@
   .tablesContainer {
     display: grid;
     grid-template-rows: 1fr 1fr;
+    grid-tempalte-columns: 1fr 1fr;
     
     min-height: 0;
     min-widht: 0;

@@ -74,7 +74,7 @@ export default function Sidebar({
     "--sidebar-width": `${width}px`
   } as CSSProperties
 
-  const ToggleIcon = collapsed ? Icons.panelOpen : Icons.panelClose
+  const ToggleIcon = collapsed ? Icons.search : Icons.panelClose
 
   return (
     <aside

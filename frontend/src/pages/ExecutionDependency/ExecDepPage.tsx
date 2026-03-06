@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import styles from "./ExecDepPage.module.css"
 
+import UpstreamList from "./UpstreamTable"
+
 import { fetchLineage } from "../../api/lineage"
 
 import { useSearchParams } from "react-router-dom"
@@ -43,9 +45,22 @@ export default function ExecDepPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
       {!loading && !error && lineage && <p>Execution dependency data loaded for {schema}.{table}.</p>}
+
+      {loading && <p>Loading...</p>}
+
+      {error && <p>{error}</p>}
+
+      {lineage && !loading && (
+
+
+        <div className={styles.tableContainer}>
+          <div className={styles.tableBox}>
+            <UpstreamList
+              data={lineage.upstream} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
