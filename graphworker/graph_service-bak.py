@@ -1,7 +1,7 @@
 import networkx as nx
 import psycopg2
 import os
-from collections import deque, defaultdict
+from collections import deque
 
 
 class LineageGraphService:
@@ -45,6 +45,7 @@ class LineageGraphService:
 
         G = nx.DiGraph()
 
+        # Build raw graph
         for source_schema, source_table, target_schema, target_table, job in rows:
 
             source_id = f"{source_schema}.{source_table}"
@@ -66,12 +67,12 @@ class LineageGraphService:
 
             G.add_edge(source_id, target_id, job=job)
 
+        # Collapse TempView nodes
         G = self._collapse_tempview_nodes(G)
-        G = self._remove_self_relationships(G)
 
-        # lineage graph must be DAG
-        if not nx.is_directed_acyclic_graph(G):
-            raise Exception("Lineage graph contains cycle")
+        # Self-joins used for incremental loads can generate self-relationships.
+        # Those edges are not useful for lineage traversal and create 1-node cycles.
+        G = self._remove_self_relationships(G)
 
         self.graphs[etl_schema] = G
         return G
@@ -90,7 +91,7 @@ class LineageGraphService:
         for temp_node in temp_nodes:
 
             if temp_node not in G:
-                continue
+                continue  # might already be removed
 
             preds = list(G.predecessors(temp_node))
             succs = list(G.successors(temp_node))
@@ -101,6 +102,7 @@ class LineageGraphService:
                     if p == s:
                         continue
 
+                    # Preserve job from predecessor → temp_node
                     job = G[p][temp_node].get("job")
 
                     if not G.has_edge(p, s):
@@ -136,60 +138,37 @@ class LineageGraphService:
         sub_nodes = set([root])
         edges = []
 
-        upstream_nodes = self._collect_direction(
-            G, root, max_level, "upstream", sub_nodes, edges
+        upstream = self._traverse_direction(
+            G, root, max_level, direction="upstream", sub_nodes=sub_nodes, edges=edges
         )
 
-        downstream_nodes = self._collect_direction(
-            G, root, max_level, "downstream", sub_nodes, edges
+        downstream = self._traverse_direction(
+            G, root, max_level, direction="downstream", sub_nodes=sub_nodes, edges=edges
         )
-
-        # build subgraph
-        G_sub = G.subgraph(sub_nodes).copy()
-
-        levels, run_levels = self._compute_topology(G_sub)
-
-        # build lookup for run_level
-        run_lookup = run_levels
-
-        # attach run_level to upstream
-        for r in upstream_nodes:
-            key = f"{r['schema']}.{r['table']}"
-            r["run_level"] = run_levels.get(key, 0)
-            r["level"] = levels.get(key, r["level"])
-
-        # attach run_level to downstream
-        for r in downstream_nodes:
-            key = f"{r['schema']}.{r['table']}"
-            r["run_level"] = run_lookup.get(key, 0)
 
         nodes = []
         for node in sub_nodes:
-
             s, t = node.split(".")
-
             nodes.append(
                 {
                     "id": node,
                     "schema": s,
                     "table": t,
                     "type": "table",
-                    "level": levels.get(node, 0),
-                    "run_level": run_levels.get(node, 0),
                 }
             )
 
         return {
             "nodes": nodes,
             "edges": edges,
-            "upstream": upstream_nodes,
-            "downstream": downstream_nodes,
+            "upstream": upstream,
+            "downstream": downstream,
         }
 
     # ---------------------------------------------------
-    # COLLECT SUBGRAPH BY DIRECTION
+    # DEPTH-AWARE DIRECTIONAL BFS
     # ---------------------------------------------------
-    def _collect_direction(
+    def _traverse_direction(
         self,
         G,
         root,
@@ -204,17 +183,15 @@ class LineageGraphService:
         results = []
 
         while queue:
-
             current, level = queue.popleft()
 
             if level >= max_level:
                 continue
 
-            neighbors = (
-                G.predecessors(current)
-                if direction == "upstream"
-                else G.successors(current)
-            )
+            if direction == "upstream":
+                neighbors = G.predecessors(current)
+            else:
+                neighbors = G.successors(current)
 
             for neighbor in neighbors:
 
@@ -223,6 +200,7 @@ class LineageGraphService:
                 if new_level > max_level:
                     continue
 
+                # Depth-aware pruning
                 if neighbor in visited and visited[neighbor] >= new_level:
                     continue
 
@@ -232,13 +210,24 @@ class LineageGraphService:
 
                 if direction == "upstream":
                     job = G[neighbor][current].get("job")
-                    edges.append({"from": neighbor, "to": current, "job": job})
+                    edges.append(
+                        {
+                            "from": neighbor,
+                            "to": current,
+                            "job": job,
+                        }
+                    )
                 else:
                     job = G[current][neighbor].get("job")
-                    edges.append({"from": current, "to": neighbor, "job": job})
+                    edges.append(
+                        {
+                            "from": current,
+                            "to": neighbor,
+                            "job": job,
+                        }
+                    )
 
                 s, t = neighbor.split(".")
-
                 results.append(
                     {
                         "schema": s,
@@ -248,37 +237,4 @@ class LineageGraphService:
                     }
                 )
 
-        # keep longest level if duplicate
-        collapsed = {}
-
-        for r in results:
-
-            key = f"{r['schema']}.{r['table']}"
-
-            if key not in collapsed or collapsed[key]["level"] < r["level"]:
-                collapsed[key] = r
-
-        return list(collapsed.values())
-
-    # ---------------------------------------------------
-    # COMPUTE TOPOLOGICAL LEVELS
-    # ---------------------------------------------------
-
-    def _compute_topology(self, G_sub: nx.DiGraph):
-
-        layers = list(nx.topological_generations(G_sub))
-
-        levels = {}
-        run_levels = {}
-
-        for depth, layer_nodes in enumerate(layers):
-            for node in layer_nodes:
-                levels[node] = depth
-
-        # max_depth = max(levels.values()) if levels else 0
-
-        for node, depth in levels.items():
-            # run_levels[node] = max_depth - depth
-            run_levels[node] = depth
-
-        return levels, run_levels
+        return results

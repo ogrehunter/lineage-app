@@ -19,6 +19,7 @@ export interface UpstreamDownstreamItem {
   schema: string
   table: string
   level: number
+  run_level: number
   via: string
 }
 

@@ -1,10 +1,13 @@
 // frontend/src/pages/TableLineage/LineageGraph.tsx
-import { useMemo } from "react"
+
+import { useEffect } from "react"
 
 import {
   ReactFlow,
   Background,
   Controls,
+  useNodesState,
+  useEdgesState,
   type Node,
   type Edge,
 } from "@xyflow/react"
@@ -60,23 +63,25 @@ export default function LineageGraph({
   direction = "LR",
 }: Props) {
 
+  const nodeTypes = {
+    table: TableNode,
+  }
+
+  /* -----------------------------
+     React Flow State
+  ------------------------------ */
+
+  const [flowNodes, setNodes, onNodesChange] = useNodesState<Node>([])
+  const [flowEdges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+
 
   /* -----------------------------
      Build + Layout Graph
   ------------------------------ */
 
-  const nodeTypes = {
-    table: TableNode,
-  }
-
-  const { nodes: flowNodes, edges: flowEdges } = useMemo(() => {
-
-    /* -----------------------------
-       Validate Nodes
-    ------------------------------ */
+  useEffect(() => {
 
     const nodeIds = new Set(nodes.map((n) => n.id))
-
 
     /* -----------------------------
        Build Nodes
@@ -102,50 +107,50 @@ export default function LineageGraph({
           n.id === root.id
             ? styles.rootNode
             : undefined,
+
+        draggable: true,
       }
     })
 
 
     /* -----------------------------
-       Build Edges (Safe)
+       Build Edges
     ------------------------------ */
 
     const initialEdges: Edge[] = edges
-
-      // Remove invalid edges
       .filter(
         (e) =>
           nodeIds.has(e.from) &&
           nodeIds.has(e.to)
       )
-
-      // Build edges
-      .map((e, index) => {
-        const edgeType = e.type ?? "unknown"
-
-        return {
-
-          id: `${e.from}-${e.to}-${e.type}-${index}`,
-
-          source: e.from,
-          target: e.to,
-
-          //label: edgeType,
-        }
-      })
+      .map((e, index) => ({
+        id: `${e.from}-${e.to}-${e.type}-${index}`,
+        source: e.from,
+        target: e.to,
+        //animated: true,
+      }))
 
 
     /* -----------------------------
-       Layout
+       Run Dagre Layout
     ------------------------------ */
 
-    return layoutElements(
-      initialNodes,
-      initialEdges,
-      direction
-    )
+    const { nodes: layoutedNodes, edges: layoutedEdges } =
+      layoutElements(
+        initialNodes,
+        initialEdges,
+        direction
+      )
 
-  }, [nodes, edges, root.id, direction])
+
+    /* -----------------------------
+       Set ReactFlow State
+    ------------------------------ */
+
+    setNodes(layoutedNodes)
+    setEdges(layoutedEdges)
+
+  }, [nodes, edges, root.id, direction, setNodes, setEdges])
 
 
   /* -----------------------------
@@ -158,7 +163,12 @@ export default function LineageGraph({
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}
+
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+
         nodeTypes={nodeTypes}
+
         nodesDraggable
         panOnDrag
 
@@ -175,4 +185,3 @@ export default function LineageGraph({
     </div>
   )
 }
-

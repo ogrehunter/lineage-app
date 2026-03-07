@@ -20,7 +20,7 @@ export default function UpstreamList({ data }: Props) {
             className={styles.table}>
             <thead>
               <tr>
-                {["#", "Schema", "Table", "Level", "Via Job"].map((col) => (
+                {["#", "Schema", "Table", "Hop", "Run Level", "Via Job"].map((col) => (
                   <th className={styles.headerCell}>
                     {col}
                   </th>
@@ -35,6 +35,7 @@ export default function UpstreamList({ data }: Props) {
                   <td className={styles.bodyCell}>{item.schema}</td>
                   <td className={styles.bodyCell}>{item.table}</td>
                   <td className={styles.bodyCell}>{item.level}</td>
+                  <td className={styles.bodyCell}>{item.run_level}</td>
                   <td className={styles.bodyCell}>{item.via}</td>
                 </tr>
               ))}

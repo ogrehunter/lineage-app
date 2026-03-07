@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import LineageGraph from "./LineageGraph"
-//import DownstreamList from "./DownstreamTable"
 import styles from "./TableLineagePage.module.css"
 import { fetchLineage } from "../../api/lineage"
 
@@ -69,17 +68,6 @@ export default function TableLineagePage() {
             />
           </div>
 
-          {/* Tables */}
-
-          <div className={styles.tablesContainer}>
-
-            {/*            <div className={styles.tableBox}>
-              <DownstreamList
-                data={lineage.downstream}
-              />
-            </div>
-*/}
-          </div>
         </>
       )
       }

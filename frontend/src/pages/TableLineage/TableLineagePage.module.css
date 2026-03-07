@@ -1,7 +1,7 @@
 .pageContainer {
   height: 100%;
   display: grid;
-  grid-template-columns: 4fr 1fr;
+  grid-template-columns: 1fr 0fr;
   gap: 1rem;
   min-height: 0;
 }
