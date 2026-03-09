@@ -18,7 +18,7 @@ import styles from "./LineageGraph.module.css"
 
 import layoutElements, {
   type LayoutDirection,
-} from "./GraphUtils"
+} from "./GraphLayout"
 
 import TableNode from "./TableNode"
 
@@ -31,6 +31,7 @@ interface LineageNode {
   id: string
   name?: string
   type: string
+  run_level?: number
 }
 
 interface LineageEdge {
@@ -99,6 +100,7 @@ export default function LineageGraph({
           table: table ?? n.id,
           isRoot: n.id === root.id,
           direction,
+          runLevel: n.run_level ?? 0,
         },
 
         position: { x: 0, y: 0 },
@@ -139,7 +141,8 @@ export default function LineageGraph({
       layoutElements(
         initialNodes,
         initialEdges,
-        direction
+        direction,
+        (node) => Number((node.data as { runLevel?: number })?.runLevel ?? 0)
       )
 
 
