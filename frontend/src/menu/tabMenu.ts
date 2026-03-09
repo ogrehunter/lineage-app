@@ -7,7 +7,7 @@ export interface MenuItem {
   icon: IconName;
 }
 
-export const SIDEBAR_MENU: MenuItem[] = [
+export const TABBED_MENU: MenuItem[] = [
   {
     label: "Table Raw Lineage",
     path: "/table",

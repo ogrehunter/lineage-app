@@ -8,7 +8,7 @@ import ColumnLineagePage from "./pages/ColumnLineage/ColumnLineagePage"
 import ExecDepPage from "./pages/ExecutionDependency/ExecDepPage"
 import ImpactDepPage from "./pages/Impact/ImpactDepPage"
 import styles from "./App.module.css"
-import { SIDEBAR_MENU } from "./menu/sidebarMenu"
+import { TABBED_MENU } from "./menu/tabMenu"
 
 
 
@@ -46,7 +46,7 @@ export default function App() {
 
           <main className={styles.main}>
             <nav className={styles.tabs} aria-label="Main navigation tabs">
-              {SIDEBAR_MENU.map((item) => (
+              {TABBED_MENU.map((item) => (
                 <NavLink
                   key={item.path}
                   to={{
