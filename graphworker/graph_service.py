@@ -1,7 +1,7 @@
 import networkx as nx
 import psycopg2
 import os
-from collections import deque, defaultdict
+from collections import deque
 
 
 class LineageGraphService:
@@ -69,7 +69,6 @@ class LineageGraphService:
         G = self._collapse_tempview_nodes(G)
         G = self._remove_self_relationships(G)
 
-        # lineage graph must be DAG
         if not nx.is_directed_acyclic_graph(G):
             raise Exception("Lineage graph contains cycle")
 
@@ -133,38 +132,20 @@ class LineageGraphService:
         if root not in G:
             return {"nodes": [], "edges": [], "upstream": [], "downstream": []}
 
+        upstream_nodes = self._collect_nodes(G, root, max_level, "upstream")
+        downstream_nodes = self._collect_nodes(G, root, max_level, "downstream")
+
         sub_nodes = set([root])
-        edges = []
+        sub_nodes.update(upstream_nodes.keys())
+        sub_nodes.update(downstream_nodes.keys())
 
-        upstream_nodes = self._collect_direction(
-            G, root, max_level, "upstream", sub_nodes, edges
-        )
-
-        downstream_nodes = self._collect_direction(
-            G, root, max_level, "downstream", sub_nodes, edges
-        )
-
-        # build subgraph
         G_sub = G.subgraph(sub_nodes).copy()
 
-        levels, run_levels = self._compute_topology(G_sub)
+        levels, run_levels = self._compute_levels(G_sub, root)
 
-        # build lookup for run_level
-        run_lookup = run_levels
-
-        # attach run_level to upstream
-        for r in upstream_nodes:
-            key = f"{r['schema']}.{r['table']}"
-            r["run_level"] = run_levels.get(key, 0)
-            r["level"] = levels.get(key, r["level"])
-
-        # attach run_level to downstream
-        for r in downstream_nodes:
-            key = f"{r['schema']}.{r['table']}"
-            r["run_level"] = run_lookup.get(key, 0)
-
+        # build node list
         nodes = []
-        for node in sub_nodes:
+        for node in G_sub.nodes():
 
             s, t = node.split(".")
 
@@ -179,29 +160,56 @@ class LineageGraphService:
                 }
             )
 
+        # build edge list from graph
+        edges = [
+            {"from": u, "to": v, "job": d.get("job")}
+            for u, v, d in G_sub.edges(data=True)
+        ]
+
+        # format upstream
+        upstream = []
+        for node, level in upstream_nodes.items():
+
+            s, t = node.split(".")
+
+            upstream.append(
+                {
+                    "schema": s,
+                    "table": t,
+                    "level": levels.get(node, level),
+                    "run_level": run_levels.get(node, 0),
+                }
+            )
+
+        # format downstream
+        downstream = []
+        for node, level in downstream_nodes.items():
+
+            s, t = node.split(".")
+
+            downstream.append(
+                {
+                    "schema": s,
+                    "table": t,
+                    "level": levels.get(node, level),
+                    "run_level": run_levels.get(node, 0),
+                }
+            )
+
         return {
             "nodes": nodes,
             "edges": edges,
-            "upstream": upstream_nodes,
-            "downstream": downstream_nodes,
+            "upstream": upstream,
+            "downstream": downstream,
         }
 
     # ---------------------------------------------------
-    # COLLECT SUBGRAPH BY DIRECTION
+    # COLLECT NODES BY DIRECTION
     # ---------------------------------------------------
-    def _collect_direction(
-        self,
-        G,
-        root,
-        max_level,
-        direction,
-        sub_nodes,
-        edges,
-    ):
+    def _collect_nodes(self, G, root, max_level, direction):
 
-        visited = {root: 0}
+        visited = {}
         queue = deque([(root, 0)])
-        results = []
 
         while queue:
 
@@ -228,57 +236,31 @@ class LineageGraphService:
 
                 visited[neighbor] = new_level
                 queue.append((neighbor, new_level))
-                sub_nodes.add(neighbor)
 
-                if direction == "upstream":
-                    job = G[neighbor][current].get("job")
-                    edges.append({"from": neighbor, "to": current, "job": job})
-                else:
-                    job = G[current][neighbor].get("job")
-                    edges.append({"from": current, "to": neighbor, "job": job})
-
-                s, t = neighbor.split(".")
-
-                results.append(
-                    {
-                        "schema": s,
-                        "table": t,
-                        "level": new_level,
-                        "via": job,
-                    }
-                )
-
-        # keep longest level if duplicate
-        collapsed = {}
-
-        for r in results:
-
-            key = f"{r['schema']}.{r['table']}"
-
-            if key not in collapsed or collapsed[key]["level"] < r["level"]:
-                collapsed[key] = r
-
-        return list(collapsed.values())
+        return visited
 
     # ---------------------------------------------------
-    # COMPUTE TOPOLOGICAL LEVELS
+    # COMPUTE LEVELS
     # ---------------------------------------------------
+    def _compute_levels(self, G_sub: nx.DiGraph, root: str):
 
-    def _compute_topology(self, G_sub: nx.DiGraph):
+        if not nx.is_directed_acyclic_graph(G_sub):
+            raise ValueError("Graph must be a DAG")
 
-        layers = list(nx.topological_generations(G_sub))
+        # visual distance from root
+        levels = nx.single_source_shortest_path_length(
+            G_sub.to_undirected(),
+            root
+        )
 
-        levels = {}
-        run_levels = {}
+        # true execution order (longest dependency chain)
+        run_levels = {node: 0 for node in G_sub.nodes()}
 
-        for depth, layer_nodes in enumerate(layers):
-            for node in layer_nodes:
-                levels[node] = depth
+        for node in nx.topological_sort(G_sub):
 
-        # max_depth = max(levels.values()) if levels else 0
+            parents = list(G_sub.predecessors(node))
 
-        for node, depth in levels.items():
-            # run_levels[node] = max_depth - depth
-            run_levels[node] = depth
+            if parents:
+                run_levels[node] = max(run_levels[p] + 1 for p in parents)
 
         return levels, run_levels
