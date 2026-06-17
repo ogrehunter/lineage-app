@@ -22,7 +22,7 @@ class LineageGraphService:
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),
             dbname=os.getenv("POSTGRES_DB"),
-            port=5432,
+            port=5433,
         )
 
         cur = conn.cursor()

@@ -38,6 +38,7 @@ interface LineageEdge {
   from: string
   to: string
   type?: string
+  job: string
 }
 
 interface Props {
@@ -129,6 +130,7 @@ export default function LineageGraph({
         id: `${e.from}-${e.to}-${e.type}-${index}`,
         source: e.from,
         target: e.to,
+        label: e.job,
         //animated: true,
       }))
 

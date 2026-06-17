@@ -74,7 +74,6 @@ def fetch_sql_jobs(conn) -> List[SQLJob]:
                 GROUP BY job_id
                 ) B ON A.job_id=b.job_id
         """
-        
 
         cur.execute(query)
 
