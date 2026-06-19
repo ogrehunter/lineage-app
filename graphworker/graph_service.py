@@ -1,11 +1,11 @@
 import networkx as nx
-import psycopg2
 import os
+from dotenv import load_dotenv
 from collections import deque
+import pymssql
 
 
 class LineageGraphService:
-
     def __init__(self):
         self.graphs = {}
 
@@ -13,27 +13,28 @@ class LineageGraphService:
     # LOAD GRAPH + COLLAPSE TEMPVIEW
     # ---------------------------------------------------
     def load_graph(self, etl_schema: str):
-
         if etl_schema in self.graphs:
             return self.graphs[etl_schema]
 
-        conn = psycopg2.connect(
-            host=os.getenv("POSTGRES_HOST"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-            dbname=os.getenv("POSTGRES_DB"),
-            port=5433,
+        load_dotenv()
+
+        conn = pymssql.connect(
+            server=os.getenv("SQL_SERVER"),
+            user=os.getenv("SQL_USER"),
+            password=os.getenv("SQL_PASSWORD"),
+            database=os.getenv("SQL_DATABASE"),
+            port=int(os.getenv("SQL_PORT", "1433")),
         )
 
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT source_schema,
-                   source_table,
-                   target_schema,
-                   target_table,
+            SELECT LOWER(source_schema) source_schema,
+                   LOWER(source_table) source_table,
+                   LOWER(target_schema) target_schema,
+                   LOWER(target_table) target_table,
                    job_name
-            FROM lineage_edges
+            FROM airflow_dag_generator.dbo.lineage_edges
             WHERE etl_schema = %s
             """,
             (etl_schema,),
@@ -46,9 +47,8 @@ class LineageGraphService:
         G = nx.DiGraph()
 
         for source_schema, source_table, target_schema, target_table, job in rows:
-
-            source_id = f"{source_schema}.{source_table}"
-            target_id = f"{target_schema}.{target_table}"
+            source_id = f"{source_schema}|{source_table}"
+            target_id = f"{target_schema}|{target_table}"
 
             G.add_node(
                 source_id,
@@ -79,15 +79,13 @@ class LineageGraphService:
     # COLLAPSE TEMPVIEW NODES
     # ---------------------------------------------------
     def _collapse_tempview_nodes(self, G: nx.DiGraph):
-
         temp_nodes = [
             node
             for node, data in G.nodes(data=True)
-            if data.get("schema") == "TempView"
+            if data.get("schema") == "tempview"
         ]
 
         for temp_node in temp_nodes:
-
             if temp_node not in G:
                 continue
 
@@ -96,7 +94,6 @@ class LineageGraphService:
 
             for p in preds:
                 for s in succs:
-
                     if p == s:
                         continue
 
@@ -113,7 +110,6 @@ class LineageGraphService:
     # REMOVE SELF RELATIONSHIP
     # ---------------------------------------------------
     def _remove_self_relationships(self, G: nx.DiGraph):
-
         self_edges = list(nx.selfloop_edges(G))
 
         if self_edges:
@@ -125,9 +121,8 @@ class LineageGraphService:
     # PUBLIC TRAVERSE
     # ---------------------------------------------------
     def traverse(self, etl_schema: str, schema: str, table: str, max_level: int):
-
         G = self.load_graph(etl_schema)
-        root = f"{schema}.{table}"
+        root = f"{schema}|{table}"
 
         if root not in G:
             return {"nodes": [], "edges": [], "upstream": [], "downstream": []}
@@ -146,12 +141,12 @@ class LineageGraphService:
         # build node list
         nodes = []
         for node in G_sub.nodes():
-
-            s, t = node.split(".")
+            print(node)
+            s, t = node.split("|")
 
             nodes.append(
                 {
-                    "id": node,
+                    "id": f"{s}.{t}",
                     "schema": s,
                     "table": t,
                     "type": "table",
@@ -162,15 +157,18 @@ class LineageGraphService:
 
         # build edge list from graph
         edges = [
-            {"from": u, "to": v, "job": d.get("job")}
+            {
+                "from": u.replace("|", "."),
+                "to": v.replace("|", "."),
+                "job": d.get("job"),
+            }
             for u, v, d in G_sub.edges(data=True)
         ]
 
         # format upstream
         upstream = []
         for node, level in upstream_nodes.items():
-
-            s, t = node.split(".")
+            s, t = node.split("|")
 
             upstream.append(
                 {
@@ -184,8 +182,7 @@ class LineageGraphService:
         # format downstream
         downstream = []
         for node, level in downstream_nodes.items():
-
-            s, t = node.split(".")
+            s, t = node.split("|")
 
             downstream.append(
                 {
@@ -207,12 +204,10 @@ class LineageGraphService:
     # COLLECT NODES BY DIRECTION
     # ---------------------------------------------------
     def _collect_nodes(self, G, root, max_level, direction):
-
         visited = {}
         queue = deque([(root, 0)])
 
         while queue:
-
             current, level = queue.popleft()
 
             if level >= max_level:
@@ -225,7 +220,6 @@ class LineageGraphService:
             )
 
             for neighbor in neighbors:
-
                 new_level = level + 1
 
                 if new_level > max_level:
@@ -243,21 +237,16 @@ class LineageGraphService:
     # COMPUTE LEVELS
     # ---------------------------------------------------
     def _compute_levels(self, G_sub: nx.DiGraph, root: str):
-
         if not nx.is_directed_acyclic_graph(G_sub):
             raise ValueError("Graph must be a DAG")
 
         # visual distance from root
-        levels = nx.single_source_shortest_path_length(
-            G_sub.to_undirected(),
-            root
-        )
+        levels = nx.single_source_shortest_path_length(G_sub.to_undirected(), root)
 
         # true execution order (longest dependency chain)
         run_levels = {node: 0 for node in G_sub.nodes()}
 
         for node in nx.topological_sort(G_sub):
-
             parents = list(G_sub.predecessors(node))
 
             if parents:

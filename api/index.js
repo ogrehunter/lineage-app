@@ -25,11 +25,15 @@ fastify.get("/api/lineage/table", async (request, reply) => {
     });
   }
 
+  const normalizedEtl = String(etl).toLowerCase();
+  const normalizedSchema = String(schema).toLowerCase();
+  const normalizedTable = String(table).toLowerCase();
+
   const maxLevel = level ? Number(level) : 10;
 
   try {
     const response = await fetch(
-      `${GRAPH_URL}/graph/lineage?etl=${etl}&schema=${schema}&table=${table}&level=${maxLevel}`,
+      `${GRAPH_URL}/graph/lineage?etl=${normalizedEtl}&schema=${normalizedSchema}&table=${normalizedTable}&level=${maxLevel}`,
     );
 
     if (!response.ok) {

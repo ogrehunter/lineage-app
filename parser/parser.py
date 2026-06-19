@@ -76,7 +76,6 @@ def _collect_sources(select_expr: exp.Expression) -> Set[Tuple[str, str]]:
     sources: Set[Tuple[str, str]] = set()
 
     for table in select_expr.find_all(exp.Table):
-
         # Skip optimizer hints
         if (
             table.find_ancestor(exp.Hint) is not None
@@ -129,12 +128,10 @@ def extract_table_lineage(
     lineage: List[TableLineage] = []
 
     for stmt in statements:
-
         # ------------------------------------------------------
         # INSERT INTO target SELECT ...
         # ------------------------------------------------------
         if isinstance(stmt, exp.Insert):
-
             target = stmt.this
             select_expr = stmt.expression
 
@@ -151,10 +148,10 @@ def extract_table_lineage(
             for src_schema, src_table in sorted(sources):
                 lineage.append(
                     TableLineage(
-                        source_schema=src_schema,
-                        source_table=src_table,
-                        target_schema=target_schema,
-                        target_table=target_table,
+                        source_schema=src_schema.lower(),
+                        source_table=src_table.lower(),
+                        target_schema=target_schema.lower(),
+                        target_table=target_table.lower(),
                     )
                 )
 
@@ -164,7 +161,6 @@ def extract_table_lineage(
         # CREATE TABLE/VIEW AS SELECT
         # ------------------------------------------------------
         if isinstance(stmt, exp.Create):
-
             kind = stmt.args.get("kind")
 
             if kind not in {"TABLE", "VIEW"}:
